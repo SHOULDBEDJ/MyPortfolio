@@ -1,0 +1,21 @@
+{
+  "name": "Dheeraj Katwe — Software Engineer Portfolio",
+  "short_name": "Dheeraj Katwe",
+  "description": "Full Stack Software Engineer & AI/ML Specialist Portfolio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=192",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

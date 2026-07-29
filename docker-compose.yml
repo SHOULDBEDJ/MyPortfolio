@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  portfolio_web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dheeraj_portfolio_app
+    ports:
+      - "8080:80"
+    restart: always
+    environment:
+      - NODE_ENV=production
