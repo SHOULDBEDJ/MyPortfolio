@@ -3,10 +3,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  Clock,
   Send,
   CheckCircle2,
-  Sparkles,
   MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -139,39 +137,31 @@ export const Contact: React.FC = () => {
                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
                       Location
                     </span>
-                    <span className="text-sm font-semibold text-foreground">
-                      {heroData.location || setupConfig.address || 'Karnataka, India'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Hours */}
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0 border border-amber-500/20">
-                    <Clock className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
-                      Working Hours
-                    </span>
-                    <span className="text-sm font-semibold text-foreground">
-                      Mon – Sat, 10:00 – 19:00 IST
-                    </span>
+                    {setupConfig.locationLink ? (
+                      <a
+                        href={setupConfig.locationLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                        title="Click to view directions"
+                      >
+                        {heroData.location || setupConfig.address || 'Karnataka, India'}
+                      </a>
+                    ) : (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(heroData.location || setupConfig.address || 'Karnataka, India')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                        title="Click to view directions"
+                      >
+                        {heroData.location || setupConfig.address || 'Karnataka, India'}
+                      </a>
+                    )}
                   </div>
                 </div>
 
               </div>
-            </div>
-
-            {/* Quick Response Guarantee */}
-            <div className="p-6 rounded-3xl bg-gradient-brand/10 border border-primary/20 space-y-2 text-center">
-              <Sparkles className="w-6 h-6 text-primary mx-auto" />
-              <h4 className="font-bold text-sm text-foreground">
-                Fast Turnaround Guaranteed
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                I typically respond to inquiries within 24 hours on business days.
-              </p>
             </div>
           </div>
 

@@ -18,6 +18,12 @@ export interface StandardRecord {
   version: number;
 }
 
+export interface SocialLinkItem {
+  id: string;
+  platform: string;
+  url: string;
+}
+
 export interface SetupConfig {
   setupCompleted: boolean;
   websiteName: string;
@@ -32,6 +38,7 @@ export interface SetupConfig {
   email: string;
   phone: string;
   address: string;
+  locationLink?: string;
   socialLinks: {
     github: string;
     linkedin: string;
@@ -39,6 +46,7 @@ export interface SetupConfig {
     youtube: string;
     leetcode?: string;
   };
+  socialLinksList?: SocialLinkItem[];
   resumeUrl: string;
   seoTitle: string;
   seoDescription: string;
@@ -390,6 +398,7 @@ const initialSetupConfig: SetupConfig = {
   email: 'dhirajkatwe109@gmail.com',
   phone: '9113565802',
   address: 'Hubli, Dharwad, Karnataka, 580024, India',
+  locationLink: 'https://maps.google.com/?q=Hubli,+Dharwad,+Karnataka,+India',
   socialLinks: {
     github: 'https://github.com',
     linkedin: 'https://linkedin.com',
@@ -397,6 +406,12 @@ const initialSetupConfig: SetupConfig = {
     leetcode: 'https://leetcode.com',
     youtube: 'https://youtube.com',
   },
+  socialLinksList: [
+    { id: 's1', platform: 'GitHub', url: 'https://github.com/SHOULDBEDJ' },
+    { id: 's2', platform: 'LinkedIn', url: 'https://linkedin.com' },
+    { id: 's3', platform: 'Twitter', url: 'https://twitter.com' },
+    { id: 's4', platform: 'YouTube', url: 'https://youtube.com' }
+  ],
   resumeUrl: '/Dheeraj_Katwe_Resume.pdf',
   seoTitle: 'Dheeraj Manohar Katwe — Software Engineer',
   seoDescription: 'Computer Science graduate (CGPA: 8.3) with hands-on experience building and deploying full-stack web applications using Java, Python, React, and Node.js.',
@@ -638,16 +653,7 @@ const initialProjects: ProjectItem[] = [
   },
 ];
 
-const initialTestimonials: TestimonialItem[] = [
-  {
-    id: 't1',
-    clientName: 'Ramesh Tailors Management',
-    company: 'Apex Bespoke Tailoring',
-    role: 'Business Owner',
-    feedback: 'Dheeraj delivered a tailoring billing system that completely digitized our customer measurement logs and invoices. Extremely dependable and skilled!',
-    rating: 5,
-  },
-];
+const initialTestimonials: TestimonialItem[] = [];
 
 const initialDocuments: DocumentFile[] = [
   {
@@ -1063,6 +1069,16 @@ class DataStore {
 
   // TESTIMONIALS
   getTestimonials(): TestimonialItem[] { return this.getItem('testimonials', initialTestimonials); }
+  saveTestimonial(t: TestimonialItem): void {
+    const items = this.getTestimonials();
+    const idx = items.findIndex(item => item.id === t.id);
+    if (idx >= 0) items[idx] = t;
+    else items.push({ ...t, id: Date.now().toString() });
+    this.setItem('testimonials', items);
+  }
+  deleteTestimonial(id: string): void {
+    this.setItem('testimonials', this.getTestimonials().filter(item => item.id !== id));
+  }
 
   // DOCUMENTS (renamed from Resumes)
   getDocuments(): DocumentFile[] { return this.getItem('documents', initialDocuments); }

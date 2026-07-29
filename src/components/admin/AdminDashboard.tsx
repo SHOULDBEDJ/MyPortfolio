@@ -22,7 +22,17 @@ import {
   FileText,
   Globe,
   Tag,
-  MessageSquare
+  MessageSquare,
+  Github,
+  Linkedin,
+  Twitter,
+  Youtube,
+  Instagram,
+  Facebook,
+  Twitch,
+  Code,
+  Link as LinkIcon,
+  Star
 } from 'lucide-react';
 import {
   db,
@@ -33,9 +43,12 @@ import {
   ExperienceItem,
   CertificationItem,
   ContactMessage,
-  DocumentFile
+  DocumentFile,
+  TestimonialItem,
+  SocialLinkItem
 } from '../../lib/db';
 import { toast } from 'sonner';
+import { getSocialIcon } from '../../lib/utils';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -54,12 +67,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
   const [experiences, setExperiences] = useState<ExperienceItem[]>(db.getExperience());
   const [certifications, setCertifications] = useState<CertificationItem[]>(db.getCertifications());
   const [messages, setMessages] = useState<ContactMessage[]>(db.getMessages());
+  const [testimonials, setTestimonials] = useState<TestimonialItem[]>(db.getTestimonials());
 
   // Editing state trackers
   const [editingProject, setEditingProject] = useState<Partial<ProjectItem> | null>(null);
   const [editingSkill, setEditingSkill] = useState<Partial<SkillItem> | null>(null);
   const [editingExp, setEditingExp] = useState<Partial<ExperienceItem>>({});
   const [editingCert, setEditingCert] = useState<Partial<CertificationItem>>({});
+  const [editingTestimonial, setEditingTestimonial] = useState<Partial<TestimonialItem> | null>(null);
+
+  // Social Links management states
+  const [socialLinksList, setSocialLinksList] = useState<SocialLinkItem[]>(config.socialLinksList || [
+    { id: 's1', platform: 'GitHub', url: config.socialLinks?.github || 'https://github.com/SHOULDBEDJ' },
+    { id: 's2', platform: 'LinkedIn', url: config.socialLinks?.linkedin || 'https://linkedin.com' },
+    { id: 's3', platform: 'Twitter', url: config.socialLinks?.twitter || 'https://twitter.com' },
+    { id: 's4', platform: 'YouTube', url: config.socialLinks?.youtube || 'https://youtube.com' }
+  ]);
+  const [newSocialPlatform, setNewSocialPlatform] = useState<string>('');
+  const [newSocialUrl, setNewSocialUrl] = useState<string>('');
+  const [editingSocialId, setEditingSocialId] = useState<string | null>(null);
 
   // Documents state
   const [documents, setDocuments] = useState<DocumentFile[]>(db.getDocuments());
@@ -68,14 +94,66 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
 
   // Reload helper
   const reloadData = () => {
+    const freshConfig = db.getSetupConfig();
     setHero(db.getHero());
-    setConfig(db.getSetupConfig());
+    setConfig(freshConfig);
     setProjects(db.getProjects());
     setSkills(db.getSkills());
     setExperiences(db.getExperience());
     setCertifications(db.getCertifications());
     setMessages(db.getMessages());
+    setTestimonials(db.getTestimonials());
+    setSocialLinksList(freshConfig.socialLinksList || []);
     setDocuments(db.getDocuments());
+  };
+
+  // --- SOCIAL LINKS HANDLERS ---
+  const handleAddSocialLink = () => {
+    if (!newSocialPlatform.trim() || !newSocialUrl.trim()) {
+      toast.error('Both platform name and URL are required.');
+      return;
+    }
+    const updatedList = [
+      ...socialLinksList,
+      { id: Date.now().toString(), platform: newSocialPlatform.trim(), url: newSocialUrl.trim() }
+    ];
+    setSocialLinksList(updatedList);
+    const updatedConfig = { ...config, socialLinksList: updatedList };
+    db.saveSetupConfig(updatedConfig);
+    setConfig(updatedConfig);
+    setNewSocialPlatform('');
+    setNewSocialUrl('');
+    toast.success('Social link added.');
+  };
+
+  const handleUpdateSocialLink = () => {
+    if (!editingSocialId) return;
+    if (!newSocialPlatform.trim() || !newSocialUrl.trim()) {
+      toast.error('Both platform name and URL are required.');
+      return;
+    }
+    const updatedList = socialLinksList.map(item =>
+      item.id === editingSocialId
+        ? { ...item, platform: newSocialPlatform.trim(), url: newSocialUrl.trim() }
+        : item
+    );
+    setSocialLinksList(updatedList);
+    const updatedConfig = { ...config, socialLinksList: updatedList };
+    db.saveSetupConfig(updatedConfig);
+    setConfig(updatedConfig);
+    setEditingSocialId(null);
+    setNewSocialPlatform('');
+    setNewSocialUrl('');
+    toast.success('Social link updated.');
+  };
+
+  const handleDeleteSocialLink = (id: string) => {
+    const updatedList = socialLinksList.filter(item => item.id !== id);
+    setSocialLinksList(updatedList);
+    const updatedConfig = { ...config, socialLinksList: updatedList };
+    db.saveSetupConfig(updatedConfig);
+    setConfig(updatedConfig);
+    toast.success('Social link deleted.');
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -280,6 +358,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     { id: 'skills', label: 'Skills & Tech', icon: Code2 },
     { id: 'experience', label: 'Experience & Education', icon: Briefcase },
     { id: 'certifications', label: 'Certifications', icon: Award },
+    { id: 'social-links', label: 'Social Media Links', icon: Globe },
+    { id: 'testimonials', label: 'Reviews & Testimonials', icon: Star, count: testimonials.length },
     { id: 'documents', label: 'Documents', icon: FileText, count: documents.length },
     { id: 'messages', label: 'Contact Messages', icon: Mail, count: messages.length },
     { id: 'settings', label: 'Site Settings & Backup', icon: Sliders },
@@ -1338,7 +1418,286 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
           </div>
         )}
 
-        {/* --- TAB 7: SETTINGS & BACKUP --- */}
+        {/* --- TAB: SOCIAL MEDIA LINKS --- */}
+        {activeTab === 'social-links' && (
+          <div className="space-y-6 max-w-3xl">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Social Media Links</h2>
+              <p className="text-xs text-muted-foreground">Add, edit, or remove your social profiles. The platform logo is auto-detected from the name.</p>
+            </div>
+
+            {/* Location Link */}
+            <div className="glass-card rounded-3xl p-6 border border-border space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <LinkIcon className="w-4 h-4 text-emerald-400" />
+                <h3 className="font-bold text-sm text-foreground">Location Directions Link</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">Paste a Google Maps or any directions URL. Clicking the location on the site will open this link.</p>
+              <input
+                type="url"
+                placeholder="https://maps.google.com/?q=Your+Location"
+                value={config.locationLink || ''}
+                onChange={(e) => setConfig({ ...config, locationLink: e.target.value })}
+                className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs font-mono"
+              />
+              <button
+                onClick={() => {
+                  db.saveSetupConfig(config);
+                  toast.success('Location link saved!');
+                }}
+                className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-2"
+              >
+                <Save className="w-3.5 h-3.5" /> Save Location Link
+              </button>
+            </div>
+
+            {/* Add / Edit Social Link Form */}
+            <div className="glass-card rounded-3xl p-6 border border-primary/30 space-y-4">
+              <h3 className="font-bold text-sm text-foreground">
+                {editingSocialId ? 'Edit Social Link' : 'Add New Social Link'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="block font-semibold mb-1">Platform Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. GitHub, LinkedIn, Instagram…"
+                    value={newSocialPlatform}
+                    onChange={(e) => setNewSocialPlatform(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                  />
+                  {newSocialPlatform && (() => {
+                    const Icon = getSocialIcon(newSocialPlatform);
+                    return (
+                      <div className="flex items-center gap-1.5 mt-1.5 text-primary">
+                        <Icon className="w-3.5 h-3.5" />
+                        <span className="text-[11px]">Auto-detected icon for <strong>{newSocialPlatform}</strong></span>
+                      </div>
+                    );
+                  })()}
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Profile URL</label>
+                  <input
+                    type="url"
+                    placeholder="https://github.com/yourhandle"
+                    value={newSocialUrl}
+                    onChange={(e) => setNewSocialUrl(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={editingSocialId ? handleUpdateSocialLink : handleAddSocialLink}
+                  className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-2"
+                >
+                  <Plus className="w-3.5 h-3.5" /> {editingSocialId ? 'Update Link' : 'Add Link'}
+                </button>
+                {editingSocialId && (
+                  <button
+                    onClick={() => { setEditingSocialId(null); setNewSocialPlatform(''); setNewSocialUrl(''); }}
+                    className="px-5 py-2 rounded-xl bg-surface-2 border border-border text-xs font-semibold"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Social Links List */}
+            <div className="space-y-3">
+              {socialLinksList.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground text-sm glass-card rounded-3xl border border-border">
+                  No social links yet. Add one above.
+                </div>
+              )}
+              {socialLinksList.map(item => {
+                const Icon = getSocialIcon(item.platform);
+                return (
+                  <div key={item.id} className="glass-card rounded-2xl p-4 border border-border flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                        <Icon className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-foreground">{item.platform}</p>
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-primary truncate block max-w-xs">{item.url}</a>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={() => { setEditingSocialId(item.id); setNewSocialPlatform(item.platform); setNewSocialUrl(item.url); }}
+                        className="p-2 rounded-lg bg-surface-2 hover:bg-primary/10 text-muted-foreground hover:text-primary border border-border transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSocialLink(item.id)}
+                        className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* --- TAB: TESTIMONIALS & REVIEWS --- */}
+        {activeTab === 'testimonials' && (
+          <div className="space-y-6 max-w-4xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">Reviews & Testimonials</h2>
+                <p className="text-xs text-muted-foreground">Manage client reviews shown on the public portfolio.</p>
+              </div>
+              <button
+                onClick={() => setEditingTestimonial({ rating: 5 })}
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" /> Add Review
+              </button>
+            </div>
+
+            {/* Add / Edit Testimonial Form */}
+            {editingTestimonial && (
+              <div className="glass-card rounded-3xl p-6 border border-primary/40 space-y-4 bg-surface/90">
+                <h3 className="font-bold text-sm text-foreground">
+                  {editingTestimonial.id ? 'Edit Review' : 'Add New Review'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="block font-semibold mb-1">Client Name</label>
+                    <input
+                      type="text"
+                      value={editingTestimonial.clientName || ''}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, clientName: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Company / Organization</label>
+                    <input
+                      type="text"
+                      value={editingTestimonial.company || ''}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, company: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Role / Position</label>
+                    <input
+                      type="text"
+                      value={editingTestimonial.role || ''}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, role: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Rating (1–5 Stars)</label>
+                    <div className="flex items-center gap-1 pt-1">
+                      {[1,2,3,4,5].map(n => (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => setEditingTestimonial({ ...editingTestimonial, rating: n })}
+                          className="focus:outline-none"
+                        >
+                          <Star className={`w-5 h-5 transition-colors ${n <= (editingTestimonial.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-border'}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block font-semibold mb-1">Feedback / Review Text</label>
+                    <textarea
+                      rows={3}
+                      value={editingTestimonial.feedback || ''}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, feedback: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (!editingTestimonial.clientName || !editingTestimonial.feedback) {
+                        toast.error('Client name and feedback are required.');
+                        return;
+                      }
+                      db.saveTestimonial({
+                        id: editingTestimonial.id || Date.now().toString(),
+                        clientName: editingTestimonial.clientName!,
+                        company: editingTestimonial.company || '',
+                        role: editingTestimonial.role || '',
+                        feedback: editingTestimonial.feedback!,
+                        rating: editingTestimonial.rating || 5,
+                      });
+                      setTestimonials(db.getTestimonials());
+                      setEditingTestimonial(null);
+                      toast.success(editingTestimonial.id ? 'Review updated!' : 'Review added!');
+                    }}
+                    className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-2"
+                  >
+                    <Save className="w-3.5 h-3.5" /> {editingTestimonial.id ? 'Update Review' : 'Save Review'}
+                  </button>
+                  <button
+                    onClick={() => setEditingTestimonial(null)}
+                    className="px-5 py-2 rounded-xl bg-surface-2 border border-border text-xs font-semibold"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Testimonials List */}
+            <div className="space-y-3">
+              {testimonials.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground text-sm glass-card rounded-3xl border border-border">
+                  No reviews yet. Click "Add Review" to add your first client testimonial.
+                </div>
+              )}
+              {testimonials.map(t => (
+                <div key={t.id} className="glass-card rounded-2xl p-5 border border-border flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-1">
+                      {[...Array(t.rating)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-xs text-foreground italic line-clamp-2">"{t.feedback}"</p>
+                    <p className="text-xs font-bold text-foreground">{t.clientName}</p>
+                    <p className="text-[11px] text-muted-foreground">{t.role} • <span className="text-primary">{t.company}</span></p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => setEditingTestimonial({ ...t })}
+                      className="p-2 rounded-lg bg-surface-2 hover:bg-primary/10 text-muted-foreground hover:text-primary border border-border transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        db.deleteTestimonial(t.id);
+                        setTestimonials(db.getTestimonials());
+                        toast.success('Review deleted.');
+                      }}
+                      className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* --- TAB: SETTINGS & BACKUP --- */}
         {activeTab === 'settings' && (
           <div className="space-y-6 max-w-4xl">
             <div>

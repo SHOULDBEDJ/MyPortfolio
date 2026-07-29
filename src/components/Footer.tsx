@@ -1,18 +1,12 @@
 import React from 'react';
-import {
-  Github,
-  Linkedin,
-  Code,
-  Terminal,
-  Award,
-  ArrowUp
-} from 'lucide-react';
-
+import { ArrowUp } from 'lucide-react';
 import { db, useDbUpdate } from '../lib/db';
+import { getSocialIcon } from '../lib/utils';
 
 export const Footer: React.FC = () => {
   useDbUpdate();
   const footerConfig = db.getFooterConfig();
+  const setupConfig = db.getSetupConfig();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -25,14 +19,13 @@ export const Footer: React.FC = () => {
     { name: 'Contact', href: '#contact' },
   ];
 
-  const heroData = db.getHero();
-  const setupConfig = db.getSetupConfig();
-
-  const socialLinks = [
-    { name: 'GitHub', icon: Github, href: heroData.githubUrl || setupConfig.socialLinks?.github || 'https://github.com/SHOULDBEDJ' },
-    { name: 'LinkedIn', icon: Linkedin, href: heroData.linkedinUrl || setupConfig.socialLinks?.linkedin || 'https://linkedin.com' },
-    { name: 'CodeChef', icon: Award, href: heroData.codechefUrl || 'https://codechef.com' },
-  ];
+  // Use admin-managed social links list if available
+  const socialLinks = (setupConfig.socialLinksList && setupConfig.socialLinksList.length > 0)
+    ? setupConfig.socialLinksList.map(item => ({ name: item.platform, href: item.url }))
+    : [
+        { name: 'GitHub', href: setupConfig.socialLinks?.github || 'https://github.com/SHOULDBEDJ' },
+        { name: 'LinkedIn', href: setupConfig.socialLinks?.linkedin || 'https://linkedin.com' },
+      ];
 
   return (
     <footer className="py-12 bg-surface border-t border-border relative">
@@ -86,7 +79,7 @@ export const Footer: React.FC = () => {
           {/* Social Icons */}
           <div className="flex items-center gap-3">
             {socialLinks.map((s) => {
-              const Icon = s.icon;
+              const Icon = getSocialIcon(s.name);
               return (
                 <a
                   key={s.name}

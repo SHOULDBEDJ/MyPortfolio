@@ -5,7 +5,6 @@ import { About } from './components/About';
 import { Services } from './components/Services';
 import { Skills } from './components/Skills';
 import { Projects } from './components/Projects';
-import { CodingProfiles } from './components/CodingProfiles';
 import { Certifications } from './components/Certifications';
 import { Experience } from './components/Experience';
 import { Testimonials } from './components/Testimonials';
@@ -18,7 +17,6 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { SetupWizardModal } from './components/admin/SetupWizardModal';
 import { WidgetEngine } from './components/shared/WidgetEngine';
 import { CommentsReactions } from './components/shared/CommentsReactions';
-import { PortfolioAI } from './components/ai/PortfolioAI';
 import { PWAInstaller } from './components/pwa/PWAInstaller';
 import { MaintenancePage } from './components/shared/MaintenancePage';
 import { db, useDbUpdate } from './lib/db';
@@ -140,7 +138,6 @@ export const App: React.FC = () => {
             {vis.services && <Services />}
             {vis.skills && toggles.skills && <Skills />}
             {vis.projects && toggles.projects && <Projects />}
-            {vis.codingProfiles && toggles.codingProfiles && <CodingProfiles />}
             
             {/* Interactive Real-Time Widgets Engine */}
             <WidgetEngine />
@@ -159,9 +156,6 @@ export const App: React.FC = () => {
           </main>
 
           {vis.footer && <Footer />}
-
-          {/* Floating AI Assistant Chatbot Widget */}
-          {toggles.aiAssistant && <PortfolioAI />}
 
           {/* PWA Installer Banner */}
           <PWAInstaller />
