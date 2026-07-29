@@ -15,7 +15,7 @@ import { GlobalSearch } from './components/GlobalSearch';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { SetupWizardModal } from './components/admin/SetupWizardModal';
-import { WidgetEngine } from './components/shared/WidgetEngine';
+
 import { CommentsReactions } from './components/shared/CommentsReactions';
 import { PWAInstaller } from './components/pwa/PWAInstaller';
 import { MaintenancePage } from './components/shared/MaintenancePage';
@@ -139,8 +139,7 @@ export const App: React.FC = () => {
             {vis.skills && toggles.skills && <Skills />}
             {vis.projects && toggles.projects && <Projects />}
             
-            {/* Interactive Real-Time Widgets Engine */}
-            <WidgetEngine />
+
 
             {vis.certifications && <Certifications />}
             {vis.experience && toggles.experience && <Experience />}
