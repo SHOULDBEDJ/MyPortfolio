@@ -25,12 +25,15 @@ export const Footer: React.FC = () => {
     { name: 'Contact', href: '#contact' },
   ];
 
+  const heroData = db.getHero();
+  const setupConfig = db.getSetupConfig();
+
   const socialLinks = [
-    { name: 'GitHub', icon: Github, href: 'https://github.com' },
-    { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com' },
-    { name: 'LeetCode', icon: Code, href: 'https://leetcode.com' },
-    { name: 'HackerRank', icon: Terminal, href: 'https://hackerrank.com' },
-    { name: 'CodeChef', icon: Award, href: 'https://codechef.com' },
+    { name: 'GitHub', icon: Github, href: heroData.githubUrl || setupConfig.socialLinks?.github || 'https://github.com/SHOULDBEDJ' },
+    { name: 'LinkedIn', icon: Linkedin, href: heroData.linkedinUrl || setupConfig.socialLinks?.linkedin || 'https://linkedin.com' },
+    { name: 'LeetCode', icon: Code, href: heroData.leetcodeUrl || setupConfig.socialLinks?.leetcode || 'https://leetcode.com' },
+    { name: 'HackerRank', icon: Terminal, href: heroData.hackerrankUrl || 'https://hackerrank.com' },
+    { name: 'CodeChef', icon: Award, href: heroData.codechefUrl || 'https://codechef.com' },
   ];
 
   return (

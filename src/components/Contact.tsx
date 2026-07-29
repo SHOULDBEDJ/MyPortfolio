@@ -33,19 +33,32 @@ export const Contact: React.FC = () => {
     }
     setLoading(true);
 
+    // Save to local DataStore as record
     db.addMessage({
       name: formData.name,
       email: formData.email,
       message: formData.message,
     });
 
+    const targetEmail = heroData.email || setupConfig.email || 'dhirajkatwe109@gmail.com';
+    const emailSubject = encodeURIComponent(`Portfolio Inquiry from ${formData.name}`);
+    const emailBody = encodeURIComponent(
+      `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+    );
+
+    // Direct Gmail Web Compose link
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${targetEmail}&su=${emailSubject}&body=${emailBody}`;
+    
+    // Open Gmail directly in new window
+    window.open(gmailComposeUrl, '_blank');
+
     setTimeout(() => {
       setLoading(false);
       setSent(true);
-      toast.success('Message sent successfully! Dheeraj will get back to you soon.');
+      toast.success('Gmail composer opened! Your message is ready to send directly to dhirajkatwe109@gmail.com.');
       setFormData({ name: '', email: '', message: '' });
       setTimeout(() => setSent(false), 5000);
-    }, 1200);
+    }, 800);
   };
 
   return (
@@ -87,8 +100,11 @@ export const Contact: React.FC = () => {
                       Email Address
                     </span>
                     <a
-                      href={`mailto:${heroData.email || setupConfig.email || 'dhirajkatwe109@gmail.com'}`}
-                      className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                      href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(heroData.email || setupConfig.email || 'dhirajkatwe109@gmail.com')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-foreground hover:text-primary transition-colors flex items-center gap-1"
+                      title="Click to open in Gmail"
                     >
                       {heroData.email || setupConfig.email || 'dhirajkatwe109@gmail.com'}
                     </a>
@@ -105,8 +121,9 @@ export const Contact: React.FC = () => {
                       Phone / WhatsApp
                     </span>
                     <a
-                      href={`tel:${heroData.phone || setupConfig.phone || '9113565802'}`}
-                      className="text-sm font-semibold text-foreground hover:text-accent transition-colors"
+                      href={`tel:+91${(heroData.phone || setupConfig.phone || '9113565802').replace(/\D/g, '')}`}
+                      className="text-sm font-semibold text-foreground hover:text-accent transition-colors flex items-center gap-1"
+                      title="Click to call directly"
                     >
                       {heroData.phone || setupConfig.phone || '9113565802'}
                     </a>

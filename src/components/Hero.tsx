@@ -108,15 +108,19 @@ export const Hero: React.FC = () => {
             {/* Contact quick links */}
             <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-muted-foreground pt-2">
               <a
-                href={`mailto:${userEmail}`}
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(userEmail)}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 hover:text-primary transition-colors glass-card px-3 py-1.5 rounded-lg"
+                title="Click to open in Gmail"
               >
                 <Mail className="w-4 h-4 text-primary" />
                 {userEmail}
               </a>
               <a
-                href={`tel:${userPhone}`}
+                href={`tel:+91${userPhone.replace(/\D/g, '')}`}
                 className="flex items-center gap-1.5 hover:text-accent transition-colors glass-card px-3 py-1.5 rounded-lg"
+                title="Click to call directly"
               >
                 <Phone className="w-4 h-4 text-accent" />
                 {userPhone}
