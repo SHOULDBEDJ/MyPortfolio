@@ -906,7 +906,7 @@ class DataStore {
       ...comment,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
-      status: 'pending',
+      status: 'approved', // auto-approve so visitors can see comments immediately
       likesCount: 0,
     });
     this.setItem('comments', comments);
