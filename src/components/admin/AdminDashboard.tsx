@@ -609,17 +609,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
                       placeholder="https://example.com"
                     />
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block font-semibold mb-1">GitHub ZIP Download URL (Source Code)</label>
-                    <input
-                      type="text"
-                      value={editingProject.zipUrl || ''}
-                      onChange={(e) => setEditingProject({ ...editingProject, zipUrl: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
-                      placeholder="https://github.com/username/repo/archive/refs/heads/main.zip (Optional)"
-                    />
-                    <span className="text-[10px] text-muted-foreground mt-1 block">
-                      Leave blank to auto-generate the ZIP download URL from the GitHub Repo URL.
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="block font-semibold">Upload Source Code (ZIP File)</label>
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <label className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all cursor-pointer flex items-center gap-2 shadow w-full sm:w-auto justify-center">
+                        <Upload className="w-3.5 h-3.5" /> Select ZIP File
+                        <input
+                          type="file"
+                          accept=".zip"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            if (file.size > 4.5 * 1024 * 1024) {
+                              toast.error('File size too large. Please select a ZIP file under 4.5MB for storage efficiency.');
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = (evt) => {
+                              const dataUrl = evt.target?.result as string;
+                              setEditingProject(prev => ({ ...prev ? { ...prev, zipUrl: dataUrl } : null }));
+                              toast.success(`ZIP file loaded: ${file.name}`);
+                            };
+                            reader.readAsDataURL(file);
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                      
+                      {editingProject.zipUrl && (
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                          <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            Source Code Zip Loaded
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setEditingProject(prev => ({ ...prev ? { ...prev, zipUrl: '' } : null }))}
+                            className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-[11px] font-semibold border border-rose-500/10"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground block">
+                      Upload the project source code zip file directly. It will be stored in the local database for visitors to download.
                     </span>
                   </div>
                 </div>

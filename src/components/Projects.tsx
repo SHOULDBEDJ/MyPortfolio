@@ -141,10 +141,9 @@ export const Projects: React.FC = () => {
                     {zipDownloadUrl && (
                       <a
                         href={zipDownloadUrl}
-                        target="_blank"
-                        rel="noreferrer"
+                        download={`${project.title.replace(/\s+/g, '_')}_SourceCode.zip`}
                         className="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-colors border border-emerald-500/20"
-                        title="Download ZIP Source Code"
+                        title="Download Source Code"
                       >
                         <Download className="w-4 h-4" />
                       </a>
@@ -249,17 +248,19 @@ export const Projects: React.FC = () => {
                     GitHub Repo
                   </a>
                 )}
-                {(selectedProject.zipUrl || (selectedProject.githubUrl && selectedProject.githubUrl !== 'https://github.com')) && (
-                  <a
-                    href={selectedProject.zipUrl || `${selectedProject.githubUrl.replace(/\/$/, '')}/archive/refs/heads/main.zip`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 font-bold text-xs transition-colors border border-emerald-500/20 flex items-center gap-1.5"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Download ZIP
-                  </a>
-                )}
+                {(() => {
+                  const modalZipUrl = selectedProject.zipUrl || (selectedProject.githubUrl && selectedProject.githubUrl !== 'https://github.com' ? `${selectedProject.githubUrl.replace(/\/$/, '')}/archive/refs/heads/main.zip` : '');
+                  return modalZipUrl ? (
+                    <a
+                      href={modalZipUrl}
+                      download={`${selectedProject.title.replace(/\s+/g, '_')}_SourceCode.zip`}
+                      className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 font-bold text-xs transition-colors border border-emerald-500/20 flex items-center gap-1.5"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download Source Code
+                    </a>
+                  ) : null;
+                })()}
               </div>
               <button
                 onClick={() => setSelectedProject(null)}
