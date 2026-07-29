@@ -318,13 +318,23 @@ export interface ContactMessage {
   starred?: boolean;
 }
 
-export interface ResumeFile {
+export interface DocumentFile {
   id: string;
   title: string;
   description: string;
+  category: 'Resume' | 'Certificate' | 'Cover Letter' | 'Report' | 'Project' | 'Other';
   fileName: string;
+  fileUrl: string;       // URL or base64 data URI
+  fileSize?: string;     // e.g. "245 KB"
+  tags?: string[];       // e.g. ["Full Stack", "Java"]
   downloadCount: number;
+  isPublic: boolean;     // visible to visitors
+  uploadedAt: string;    // ISO date string
 }
+
+// Keep ResumeFile as alias for backward compat
+export type ResumeFile = DocumentFile;
+
 
 export interface MediaFile {
   id: string;
@@ -639,15 +649,22 @@ const initialTestimonials: TestimonialItem[] = [
   },
 ];
 
-const initialResumes: ResumeFile[] = [
+const initialDocuments: DocumentFile[] = [
   {
-    id: 'r1',
+    id: 'doc1',
     title: 'Software Engineer Resume (Full Stack Focus)',
-    description: 'Detailed resume featuring React, Node.js, SQL, and AI/ML qualifications.',
+    description: 'Detailed resume featuring React, Node.js, SQL, and AI/ML qualifications. Best suited for Software Engineer / Full Stack Developer roles.',
+    category: 'Resume',
     fileName: 'Dheeraj_Katwe_Software_Engineer_Resume.pdf',
-    downloadCount: 42,
+    fileUrl: '',
+    fileSize: 'N/A',
+    tags: ['React', 'Node.js', 'Full Stack', 'AI/ML'],
+    downloadCount: 0,
+    isPublic: true,
+    uploadedAt: new Date().toISOString(),
   },
 ];
+
 
 const initialSectionVisibility: SectionVisibility = {
   hero: true,
@@ -1047,16 +1064,26 @@ class DataStore {
   // TESTIMONIALS
   getTestimonials(): TestimonialItem[] { return this.getItem('testimonials', initialTestimonials); }
 
-  // RESUMES
-  getResumes(): ResumeFile[] { return this.getItem('resumes', initialResumes); }
-  incrementResumeDownload(id: string): void {
-    const items = this.getResumes();
-    const idx = items.findIndex(r => r.id === id);
-    if (idx >= 0) {
-      items[idx].downloadCount += 1;
-      this.setItem('resumes', items);
-    }
+  // DOCUMENTS (renamed from Resumes)
+  getDocuments(): DocumentFile[] { return this.getItem('documents', initialDocuments); }
+  saveDocument(doc: DocumentFile): void {
+    const docs = this.getDocuments();
+    const idx = docs.findIndex(d => d.id === doc.id);
+    if (idx >= 0) docs[idx] = doc;
+    else docs.push({ ...doc, id: Date.now().toString(), uploadedAt: new Date().toISOString(), downloadCount: 0 });
+    this.setItem('documents', docs);
   }
+  deleteDocument(id: string): void {
+    this.setItem('documents', this.getDocuments().filter(d => d.id !== id));
+  }
+  incrementDocumentDownload(id: string): void {
+    const docs = this.getDocuments();
+    const idx = docs.findIndex(d => d.id === id);
+    if (idx >= 0) { docs[idx].downloadCount += 1; this.setItem('documents', docs); }
+  }
+  // backward compat alias
+  getResumes(): DocumentFile[] { return this.getDocuments(); }
+  incrementResumeDownload(id: string): void { this.incrementDocumentDownload(id); }
 
   // CONTACT MESSAGES
   getMessages(): ContactMessage[] { return this.getItem('messages', []); }

@@ -18,7 +18,10 @@ import {
   Download,
   Upload,
   RefreshCw,
-  ShieldCheck
+  ShieldCheck,
+  FileText,
+  Globe,
+  Tag
 } from 'lucide-react';
 import {
   db,
@@ -28,7 +31,8 @@ import {
   SkillItem,
   ExperienceItem,
   CertificationItem,
-  ContactMessage
+  ContactMessage,
+  DocumentFile
 } from '../../lib/db';
 import { toast } from 'sonner';
 
@@ -56,6 +60,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
   const [editingExp, setEditingExp] = useState<Partial<ExperienceItem>>({});
   const [editingCert, setEditingCert] = useState<Partial<CertificationItem>>({});
 
+  // Documents state
+  const [documents, setDocuments] = useState<DocumentFile[]>(db.getDocuments());
+  const [editingDoc, setEditingDoc] = useState<Partial<DocumentFile> | null>(null);
+  const [docFilePreview, setDocFilePreview] = useState<string>('');
+
   // Reload helper
   const reloadData = () => {
     setHero(db.getHero());
@@ -65,6 +74,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     setExperiences(db.getExperience());
     setCertifications(db.getCertifications());
     setMessages(db.getMessages());
+    setDocuments(db.getDocuments());
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,6 +278,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     { id: 'skills', label: 'Skills & Tech', icon: Code2 },
     { id: 'experience', label: 'Experience & Education', icon: Briefcase },
     { id: 'certifications', label: 'Certifications', icon: Award },
+    { id: 'documents', label: 'Documents', icon: FileText, count: documents.length },
     { id: 'messages', label: 'Contact Messages', icon: Mail, count: messages.length },
     { id: 'settings', label: 'Site Settings & Backup', icon: Sliders },
   ];
@@ -991,6 +1002,218 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* --- TAB: DOCUMENTS --- */}
+        {activeTab === 'documents' && (
+          <div className="space-y-6 max-w-4xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">Documents</h2>
+                <p className="text-xs text-muted-foreground">Manage downloadable files visible to visitors. Click a document to edit.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingDoc({ category: 'Resume', isPublic: true, tags: [], fileName: '', fileUrl: '', fileSize: '', title: '', description: '' });
+                  setDocFilePreview('');
+                }}
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 shadow"
+              >
+                <Plus className="w-4 h-4" /> Add Document
+              </button>
+            </div>
+
+            {/* Add / Edit Form */}
+            {editingDoc !== null && (
+              <div className="glass-card rounded-3xl p-6 border border-primary/30 space-y-4">
+                <h3 className="font-bold text-sm">{editingDoc.id ? 'Edit Document' : 'Add New Document'}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  <div className="md:col-span-2">
+                    <label className="block font-semibold mb-1">Document Title *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Software Engineer Resume"
+                      value={editingDoc.title || ''}
+                      onChange={e => setEditingDoc({ ...editingDoc, title: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block font-semibold mb-1">Description</label>
+                    <textarea
+                      rows={2}
+                      placeholder="Brief description of this document..."
+                      value={editingDoc.description || ''}
+                      onChange={e => setEditingDoc({ ...editingDoc, description: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Category</label>
+                    <select
+                      value={editingDoc.category || 'Resume'}
+                      onChange={e => setEditingDoc({ ...editingDoc, category: e.target.value as DocumentFile['category'] })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    >
+                      {['Resume', 'Certificate', 'Cover Letter', 'Report', 'Project', 'Other'].map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">File Name (display)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Dheeraj_Resume.pdf"
+                      value={editingDoc.fileName || ''}
+                      onChange={e => setEditingDoc({ ...editingDoc, fileName: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border font-mono"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block font-semibold mb-1">File URL (Google Drive / Dropbox link)</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        placeholder="https://drive.google.com/..."
+                        value={editingDoc.fileUrl?.startsWith('data:') ? '' : (editingDoc.fileUrl || '')}
+                        onChange={e => setEditingDoc({ ...editingDoc, fileUrl: e.target.value })}
+                        className="flex-1 px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                      />
+                      <Globe className="w-4 h-4 text-muted-foreground self-center shrink-0" />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-1">OR upload a file below (base64 stored locally)</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block font-semibold mb-1">Upload File (PDF / DOC)</label>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 10 * 1024 * 1024) { toast.error('File too large! Max 10MB.'); return; }
+                        const reader = new FileReader();
+                        reader.onload = evt => {
+                          const dataUrl = evt.target?.result as string;
+                          setEditingDoc(prev => ({ ...prev, fileUrl: dataUrl, fileName: prev?.fileName || file.name, fileSize: `${(file.size / 1024).toFixed(0)} KB` }));
+                          setDocFilePreview(file.name);
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border text-xs"
+                    />
+                    {docFilePreview && (
+                      <p className="text-[10px] text-emerald-400 mt-1">✅ File loaded: {docFilePreview}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Tags (comma separated)</label>
+                    <input
+                      type="text"
+                      placeholder="React, Node.js, Full Stack"
+                      value={(editingDoc.tags || []).join(', ')}
+                      onChange={e => setEditingDoc({ ...editingDoc, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3 pt-5">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold">
+                      <input
+                        type="checkbox"
+                        checked={editingDoc.isPublic !== false}
+                        onChange={e => setEditingDoc({ ...editingDoc, isPublic: e.target.checked })}
+                        className="w-4 h-4 accent-primary"
+                      />
+                      Visible to Visitors (Public)
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      if (!editingDoc.title?.trim()) { toast.error('Title is required!'); return; }
+                      const doc: DocumentFile = {
+                        id: editingDoc.id || Date.now().toString(),
+                        title: editingDoc.title || '',
+                        description: editingDoc.description || '',
+                        category: editingDoc.category || 'Other',
+                        fileName: editingDoc.fileName || 'document.pdf',
+                        fileUrl: editingDoc.fileUrl || '',
+                        fileSize: editingDoc.fileSize || '',
+                        tags: editingDoc.tags || [],
+                        downloadCount: editingDoc.downloadCount || 0,
+                        isPublic: editingDoc.isPublic !== false,
+                        uploadedAt: editingDoc.uploadedAt || new Date().toISOString(),
+                      };
+                      db.saveDocument(doc);
+                      setDocuments(db.getDocuments());
+                      setEditingDoc(null);
+                      setDocFilePreview('');
+                      toast.success(editingDoc.id ? 'Document updated!' : 'Document added!');
+                    }}
+                    className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5"
+                  >
+                    <Save className="w-4 h-4" /> {editingDoc.id ? 'Update Document' : 'Save Document'}
+                  </button>
+                  <button
+                    onClick={() => { setEditingDoc(null); setDocFilePreview(''); }}
+                    className="px-5 py-2 rounded-xl bg-surface-2 border border-border text-xs font-semibold"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Documents List */}
+            <div className="space-y-3">
+              {documents.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground text-sm glass-card rounded-3xl border border-border">
+                  No documents yet. Click "Add Document" to get started.
+                </div>
+              )}
+              {documents.map(doc => (
+                <div key={doc.id} className="glass-card rounded-2xl p-5 border border-border flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                      <FileText className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-bold text-foreground">{doc.title}</h4>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${doc.isPublic ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
+                          {doc.isPublic ? 'Public' : 'Hidden'}
+                        </span>
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-surface-2 border border-border text-muted-foreground">{doc.category}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{doc.description}</p>
+                      <p className="text-[11px] font-mono text-primary/70 mt-0.5">{doc.fileName} {doc.fileSize ? `• ${doc.fileSize}` : ''}</p>
+                      <p className="text-[10px] text-emerald-400 mt-0.5">{doc.downloadCount} downloads</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => { setEditingDoc({ ...doc }); setDocFilePreview(''); }}
+                      className="p-2 rounded-lg bg-surface-2 hover:bg-primary/10 text-muted-foreground hover:text-primary border border-border transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        db.deleteDocument(doc.id);
+                        setDocuments(db.getDocuments());
+                        toast.success('Document deleted.');
+                      }}
+                      className="p-2 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

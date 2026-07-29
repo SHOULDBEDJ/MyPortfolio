@@ -92,14 +92,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             </kbd>
           </button>
 
-          {/* Resume Downloads Modal Trigger */}
+          {/* Documents Modal Trigger */}
           <button
             onClick={onOpenResume}
             className="p-2 sm:px-3 sm:py-2 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary transition-all flex items-center gap-1.5 text-xs font-bold"
-            title="Download Resume"
+            title="View & Download Documents"
           >
             <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Resume</span>
+            <span className="hidden sm:inline">Documents</span>
           </button>
 
           {/* Theme Toggle Button */}
