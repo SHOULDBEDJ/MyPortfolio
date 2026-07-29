@@ -36,8 +36,8 @@ export interface SetupConfig {
     github: string;
     linkedin: string;
     twitter: string;
-    leetcode: string;
     youtube: string;
+    leetcode?: string;
   };
   resumeUrl: string;
   seoTitle: string;
@@ -71,7 +71,7 @@ export interface FeatureToggles {
   likes: boolean;
   analytics: boolean;
   githubSync: boolean;
-  leetcodeSync: boolean;
+  leetcodeSync?: boolean;
   visitorsCounter: boolean;
   openSource: boolean;
   codingProfiles: boolean;
@@ -221,8 +221,8 @@ export interface HeroData {
   location: string;
   githubUrl: string;
   linkedinUrl: string;
-  leetcodeUrl: string;
-  hackerrankUrl: string;
+  leetcodeUrl?: string;
+  hackerrankUrl?: string;
   codechefUrl: string;
   profilePhotoUrl?: string;
   coverPhotoUrl?: string;
@@ -271,6 +271,7 @@ export interface ProjectItem {
   features: string[];
   githubUrl?: string;
   demoUrl?: string;
+  zipUrl?: string;
   featured?: boolean;
 }
 
@@ -428,7 +429,7 @@ const initialFeatureToggles: FeatureToggles = {
   likes: true,
   analytics: true,
   githubSync: true,
-  leetcodeSync: true,
+  leetcodeSync: false,
   visitorsCounter: true,
   openSource: true,
   codingProfiles: true,
@@ -438,7 +439,6 @@ const initialFeatureToggles: FeatureToggles = {
 
 const initialWidgets: WidgetItem[] = [
   { id: 'w1', type: 'github_contributions', title: 'GitHub Contributions', enabled: true, position: 1, colSpan: 2 },
-  { id: 'w2', type: 'coding_stats', title: 'LeetCode Problem Stats', enabled: true, position: 2, colSpan: 1 },
   { id: 'w3', type: 'clock', title: 'World Clock & Timezone', enabled: true, position: 3, colSpan: 1 },
   { id: 'w4', type: 'calendar', title: 'Availability Calendar', enabled: true, position: 4, colSpan: 1 },
   { id: 'w5', type: 'visitor_count', title: 'Real-time Visitors', enabled: true, position: 5, colSpan: 1 },

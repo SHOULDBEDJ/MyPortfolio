@@ -31,8 +31,6 @@ export const Footer: React.FC = () => {
   const socialLinks = [
     { name: 'GitHub', icon: Github, href: heroData.githubUrl || setupConfig.socialLinks?.github || 'https://github.com/SHOULDBEDJ' },
     { name: 'LinkedIn', icon: Linkedin, href: heroData.linkedinUrl || setupConfig.socialLinks?.linkedin || 'https://linkedin.com' },
-    { name: 'LeetCode', icon: Code, href: heroData.leetcodeUrl || setupConfig.socialLinks?.leetcode || 'https://leetcode.com' },
-    { name: 'HackerRank', icon: Terminal, href: heroData.hackerrankUrl || 'https://hackerrank.com' },
     { name: 'CodeChef', icon: Award, href: heroData.codechefUrl || 'https://codechef.com' },
   ];
 

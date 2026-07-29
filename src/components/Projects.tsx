@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  Download
 } from 'lucide-react';
 
 interface Project {
@@ -60,6 +61,7 @@ export const Projects: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project) => {
             const Icon = project.icon;
+            const zipDownloadUrl = project.zipUrl || (project.githubUrl && project.githubUrl !== 'https://github.com' ? `${project.githubUrl.replace(/\/$/, '')}/archive/refs/heads/main.zip` : '');
             return (
               <div
                 key={project.id}
@@ -134,6 +136,17 @@ export const Projects: React.FC = () => {
                         title="Live Demo"
                       >
                         <ExternalLink className="w-4 h-4" />
+                      </a>
+                    )}
+                    {zipDownloadUrl && (
+                      <a
+                        href={zipDownloadUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 transition-colors border border-emerald-500/20"
+                        title="Download ZIP Source Code"
+                      >
+                        <Download className="w-4 h-4" />
                       </a>
                     )}
                   </div>
@@ -212,10 +225,45 @@ export const Projects: React.FC = () => {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
+            <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                {selectedProject.demoUrl && (
+                  <a
+                    href={selectedProject.demoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 rounded-xl bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 transition-all flex items-center gap-1.5 shadow"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Live Demo
+                  </a>
+                )}
+                {selectedProject.githubUrl && (
+                  <a
+                    href={selectedProject.githubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 rounded-xl bg-surface hover:bg-surface-2 text-foreground font-bold text-xs transition-colors border border-border flex items-center gap-1.5"
+                  >
+                    <Github className="w-3.5 h-3.5" />
+                    GitHub Repo
+                  </a>
+                )}
+                {(selectedProject.zipUrl || (selectedProject.githubUrl && selectedProject.githubUrl !== 'https://github.com')) && (
+                  <a
+                    href={selectedProject.zipUrl || `${selectedProject.githubUrl.replace(/\/$/, '')}/archive/refs/heads/main.zip`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 font-bold text-xs transition-colors border border-emerald-500/20 flex items-center gap-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Download ZIP
+                  </a>
+                )}
+              </div>
               <button
                 onClick={() => setSelectedProject(null)}
-                className="px-5 py-2.5 rounded-xl font-semibold text-xs text-foreground bg-surface hover:bg-surface-2 border border-border"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-xs text-foreground bg-surface hover:bg-surface-2 border border-border"
               >
                 Close
               </button>

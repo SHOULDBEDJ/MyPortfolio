@@ -140,6 +140,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
       features: editingProject.features || [],
       githubUrl: editingProject.githubUrl || '',
       demoUrl: editingProject.demoUrl || '',
+      zipUrl: editingProject.zipUrl || '',
       featured: editingProject.featured ?? true,
     };
     db.saveProject(item);
@@ -506,24 +507,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
                     className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1">LeetCode URL</label>
-                  <input
-                    type="text"
-                    value={hero.leetcodeUrl || ''}
-                    onChange={(e) => setHero({ ...hero, leetcodeUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold mb-1">HackerRank URL</label>
-                  <input
-                    type="text"
-                    value={hero.hackerrankUrl || ''}
-                    onChange={(e) => setHero({ ...hero, hackerrankUrl: e.target.value })}
-                    className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
-                  />
-                </div>
               </div>
 
               <div className="pt-2 flex justify-end">
@@ -613,7 +596,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
                       value={editingProject.githubUrl || ''}
                       onChange={(e) => setEditingProject({ ...editingProject, githubUrl: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                      placeholder="https://github.com/username/repo"
                     />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Project Demo URL (Live Site)</label>
+                    <input
+                      type="text"
+                      value={editingProject.demoUrl || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, demoUrl: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block font-semibold mb-1">GitHub ZIP Download URL (Source Code)</label>
+                    <input
+                      type="text"
+                      value={editingProject.zipUrl || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, zipUrl: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                      placeholder="https://github.com/username/repo/archive/refs/heads/main.zip (Optional)"
+                    />
+                    <span className="text-[10px] text-muted-foreground mt-1 block">
+                      Leave blank to auto-generate the ZIP download URL from the GitHub Repo URL.
+                    </span>
                   </div>
                 </div>
                 <div className="flex gap-2 justify-end pt-2">

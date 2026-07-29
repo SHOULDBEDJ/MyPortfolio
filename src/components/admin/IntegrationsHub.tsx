@@ -6,9 +6,8 @@ import { toast } from 'sonner';
 export const IntegrationsHub: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'sync' | 'newsletter' | 'comments'>('sync');
 
-  // GitHub & LeetCode Sync State
+  // GitHub Sync State
   const [syncingGithub, setSyncingGithub] = useState<boolean>(false);
-  const [syncingLeetcode, setSyncingLeetcode] = useState<boolean>(false);
 
   // Newsletter State
   const [subscribers] = useState<NewsletterSubscriber[]>(db.getSubscribers());
@@ -24,15 +23,6 @@ export const IntegrationsHub: React.FC = () => {
       setSyncingGithub(false);
       db.logActivity('GitHub Auto Sync Executed', 'Synced public repositories, stars, and language metrics', 'success');
       toast.success('GitHub Repositories and Contribution Matrix synced!');
-    }, 1500);
-  };
-
-  const handleSyncLeetcode = () => {
-    setSyncingLeetcode(true);
-    setTimeout(() => {
-      setSyncingLeetcode(false);
-      db.logActivity('LeetCode Auto Sync Executed', 'Synced solved problems and contest badge rating', 'success');
-      toast.success('LeetCode Solved Problems and Contest Stats synced!');
     }, 1500);
   };
 
@@ -61,7 +51,7 @@ export const IntegrationsHub: React.FC = () => {
             <RefreshCw className="w-6 h-6 text-primary" />
             Integrations & Audience Center
           </h2>
-          <p className="text-xs text-muted-foreground">GitHub/LeetCode auto-sync, email newsletters, and comments moderation.</p>
+          <p className="text-xs text-muted-foreground">GitHub auto-sync, email newsletters, and comments moderation.</p>
         </div>
 
         <div className="flex items-center gap-1.5 bg-surface-2 p-1 rounded-2xl border border-border">
@@ -88,7 +78,7 @@ export const IntegrationsHub: React.FC = () => {
 
       {/* Tab: Auto Sync */}
       {activeTab === 'sync' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <div className="glass-card rounded-3xl p-6 border border-border space-y-4">
             <div className="flex items-center gap-2 text-foreground font-bold">
               <Github className="w-5 h-5 text-primary" />
@@ -104,24 +94,6 @@ export const IntegrationsHub: React.FC = () => {
             >
               <RefreshCw className={`w-4 h-4 ${syncingGithub ? 'animate-spin' : ''}`} />
               {syncingGithub ? 'Syncing Repos...' : 'Sync GitHub Repositories'}
-            </button>
-          </div>
-
-          <div className="glass-card rounded-3xl p-6 border border-border space-y-4">
-            <div className="flex items-center gap-2 text-foreground font-bold">
-              <Code2 className="w-5 h-5 text-amber-400" />
-              <h3 className="text-sm font-bold">LeetCode Problem Stats Auto Sync</h3>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Fetch total solved problems (Easy, Medium, Hard), contest rating, and badges directly from LeetCode.
-            </p>
-            <button
-              onClick={handleSyncLeetcode}
-              disabled={syncingLeetcode}
-              className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${syncingLeetcode ? 'animate-spin' : ''}`} />
-              {syncingLeetcode ? 'Syncing Stats...' : 'Sync LeetCode Profile'}
             </button>
           </div>
         </div>
