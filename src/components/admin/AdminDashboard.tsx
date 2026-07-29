@@ -65,6 +65,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     setMessages(db.getMessages());
   };
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size too large. Please select an image under 5MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const dataUrl = evt.target?.result as string;
+      setHero((prev) => ({ ...prev, profilePhotoUrl: dataUrl }));
+      toast.success('Photo uploaded! Click "Save Profile Details" below.');
+    };
+    reader.readAsDataURL(file);
+  };
+
   // --- SAVE HANDLERS ---
   const handleSaveHero = () => {
     db.saveHero(hero);
@@ -75,7 +91,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
       address: hero.location,
       websiteName: hero.name
     });
-    toast.success('Profile details saved successfully!');
+    toast.success('Profile & photo updated successfully!');
     reloadData();
   };
 
@@ -321,7 +337,67 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
               <p className="text-xs text-muted-foreground">Manage your personal details displayed across the portfolio.</p>
             </div>
 
-            <div className="glass-card rounded-3xl p-6 border border-border space-y-4">
+            <div className="glass-card rounded-3xl p-6 border border-border space-y-6">
+              
+              {/* Profile Photo Uploader & Preview */}
+              <div className="p-4 rounded-2xl bg-surface-2/60 border border-border space-y-3">
+                <label className="block text-xs font-bold text-foreground">
+                  Profile Photo & Avatar
+                </label>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {/* Photo Preview Box */}
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-brand flex items-center justify-center text-primary-foreground font-black text-2xl shadow-md overflow-hidden shrink-0 border border-border relative">
+                    {hero.profilePhotoUrl ? (
+                      <img
+                        src={hero.profilePhotoUrl}
+                        alt="Profile Preview"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    ) : (
+                      <span>DK</span>
+                    )}
+                  </div>
+
+                  {/* Upload Actions & URL input */}
+                  <div className="flex-1 space-y-2.5 w-full">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all cursor-pointer flex items-center gap-2 shadow">
+                        <Upload className="w-3.5 h-3.5" /> Upload Image File
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {hero.profilePhotoUrl && (
+                        <button
+                          onClick={() => setHero({ ...hero, profilePhotoUrl: '' })}
+                          className="px-3 py-2 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold"
+                        >
+                          Remove Photo
+                        </button>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] text-muted-foreground font-medium mb-1">
+                        Or paste image URL:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="https://example.com/my-photo.jpg"
+                        value={hero.profilePhotoUrl || ''}
+                        onChange={(e) => setHero({ ...hero, profilePhotoUrl: e.target.value })}
+                        className="w-full px-3.5 py-1.5 rounded-xl bg-surface-2 border border-border text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* General Inputs Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold mb-1">Full Name</label>
@@ -383,6 +459,44 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
                     rows={3}
                     value={hero.bio}
                     onChange={(e) => setHero({ ...hero, bio: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
+                  />
+                </div>
+
+                {/* Social Media Links */}
+                <div>
+                  <label className="block text-xs font-semibold mb-1">GitHub URL</label>
+                  <input
+                    type="text"
+                    value={hero.githubUrl || ''}
+                    onChange={(e) => setHero({ ...hero, githubUrl: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">LinkedIn URL</label>
+                  <input
+                    type="text"
+                    value={hero.linkedinUrl || ''}
+                    onChange={(e) => setHero({ ...hero, linkedinUrl: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">LeetCode URL</label>
+                  <input
+                    type="text"
+                    value={hero.leetcodeUrl || ''}
+                    onChange={(e) => setHero({ ...hero, leetcodeUrl: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1">HackerRank URL</label>
+                  <input
+                    type="text"
+                    value={hero.hackerrankUrl || ''}
+                    onChange={(e) => setHero({ ...hero, hackerrankUrl: e.target.value })}
                     className="w-full px-3.5 py-2 rounded-xl bg-surface-2 border border-border text-xs"
                   />
                 </div>
