@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, Mail, ArrowRight, ShieldCheck, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { db } from '../../lib/db';
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -8,8 +9,8 @@ interface AdminLoginProps {
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onClose }) => {
-  const [email, setEmail] = useState('admin@dheerajkatwe.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -18,14 +19,18 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onClose 
 
     setTimeout(() => {
       setLoading(false);
-      // Validates admin credentials
-      if (email.trim() && password.trim()) {
+      const currentAuth = db.getAdminAuth();
+
+      const inputEmail = email.trim().toLowerCase();
+      const expectedEmail = currentAuth.email.trim().toLowerCase();
+
+      if (inputEmail === expectedEmail && password === currentAuth.passwordHash) {
         toast.success('Admin authenticated successfully!');
         onLoginSuccess();
       } else {
-        toast.error('Invalid credentials');
+        toast.error('Invalid Admin Email or Password!');
       }
-    }, 600);
+    }, 500);
   };
 
   return (
@@ -50,16 +55,18 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onClose 
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           <div>
             <label className="block text-xs font-semibold text-foreground mb-1.5">
-              Admin Email
+              Admin Email / Login ID
             </label>
             <div className="relative flex items-center">
               <Mail className="w-4 h-4 text-muted-foreground absolute left-3.5" />
               <input
                 type="email"
                 required
+                placeholder="Enter your admin email"
+                autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-2 border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -76,6 +83,8 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onClose 
               <input
                 type="password"
                 required
+                placeholder="Enter your password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 rounded-xl bg-surface-2 border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -95,7 +104,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onClose 
 
         <div className="p-3.5 rounded-xl bg-surface-2/60 border border-border text-center text-xs text-muted-foreground">
           <ShieldCheck className="w-4 h-4 text-emerald-400 inline-block mr-1" />
-          Protected Route • Auto Sync Enabled
+          Secure Route • Inputs Cleared
         </div>
       </div>
     </div>

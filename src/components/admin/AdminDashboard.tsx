@@ -17,7 +17,8 @@ import {
   CheckCircle2,
   Download,
   Upload,
-  RefreshCw
+  RefreshCw,
+  ShieldCheck
 } from 'lucide-react';
 import {
   db,
@@ -42,6 +43,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
   // Local Component States for Data Editing
   const [hero, setHero] = useState<HeroData>(db.getHero());
   const [config, setConfig] = useState<SetupConfig>(db.getSetupConfig());
+  const [adminAuth, setAdminAuth] = useState<{ email: string; passwordHash: string }>(db.getAdminAuth());
   const [projects, setProjects] = useState<ProjectItem[]>(db.getProjects());
   const [skills, setSkills] = useState<SkillItem[]>(db.getSkills());
   const [experiences, setExperiences] = useState<ExperienceItem[]>(db.getExperience());
@@ -99,6 +101,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     db.saveSetupConfig(config);
     toast.success('Site settings saved successfully!');
     reloadData();
+  };
+
+  const handleSaveAdminAuth = () => {
+    if (!adminAuth.email.trim() || !adminAuth.passwordHash.trim()) {
+      toast.error('Admin email and password cannot be empty!');
+      return;
+    }
+    db.saveAdminAuth(adminAuth);
+    toast.success('Admin credentials updated! Use your new Email & Password on next sign in.');
+    setAdminAuth(db.getAdminAuth());
   };
 
   const handleSaveProject = () => {
@@ -1027,6 +1039,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
               >
                 Save Settings
               </button>
+            </div>
+
+            {/* Admin Login Credentials & Security */}
+            <div className="glass-card rounded-3xl p-6 border border-border space-y-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-sm text-foreground">Change Admin Login ID & Password</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Customize your login Email ID and Password for signing into this Admin CMS Portal.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <label className="block font-semibold mb-1">Admin Email / Login ID</label>
+                  <input
+                    type="email"
+                    value={adminAuth.email}
+                    onChange={(e) => setAdminAuth({ ...adminAuth, email: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
+                    placeholder="e.g. admin@dheerajkatwe.com"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Admin Password</label>
+                  <input
+                    type="text"
+                    value={adminAuth.passwordHash}
+                    onChange={(e) => setAdminAuth({ ...adminAuth, passwordHash: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border font-mono"
+                    placeholder="Enter new password"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={handleSaveAdminAuth}
+                  className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow hover:opacity-90 flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" /> Update Admin Credentials
+                </button>
+              </div>
             </div>
 
             {/* Backup & Restore */}

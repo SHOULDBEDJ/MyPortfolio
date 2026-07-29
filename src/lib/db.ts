@@ -940,6 +940,18 @@ class DataStore {
     return counts;
   }
 
+  // ADMIN SECURITY CREDENTIALS
+  getAdminAuth(): { email: string; passwordHash: string } {
+    return this.getItem('admin_auth_credentials', {
+      email: 'admin@dheerajkatwe.com',
+      passwordHash: 'admin123',
+    });
+  }
+
+  saveAdminAuth(credentials: { email: string; passwordHash: string }): void {
+    this.setItem('admin_auth_credentials', credentials);
+  }
+
   // NEWSLETTER
   getSubscribers(): NewsletterSubscriber[] { return this.getItem('subscribers', []); }
   addSubscriber(email: string): boolean {
