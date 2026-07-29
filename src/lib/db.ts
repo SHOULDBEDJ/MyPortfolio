@@ -904,19 +904,17 @@ class DataStore {
   }
 
   getReactions(targetId: string = 'global'): ReactionCounts {
-    const raw = localStorage.getItem(`reactions_${targetId}`);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed.like >= 100 || parsed.love >= 90) {
-          const resetCounts = { like: 0, love: 0, fire: 0, rocket: 0, clap: 0 };
-          this.setItem(`reactions_${targetId}`, resetCounts);
-          return resetCounts;
-        }
-        return parsed;
-      } catch (e) {}
+    // Purge any stale old-key data (without portfolio_ prefix)
+    localStorage.removeItem(`reactions_${targetId}`);
+    // Always use the correct portfolio_-prefixed key via getItem
+    const stored = this.getItem<ReactionCounts>(`reactions_${targetId}`, { like: 0, love: 0, fire: 0, rocket: 0, clap: 0 });
+    // Auto-reset if bogus seeded numbers are still present
+    if (stored.like >= 50 || stored.love >= 50 || stored.fire >= 50 || stored.rocket >= 50) {
+      const resetCounts: ReactionCounts = { like: 0, love: 0, fire: 0, rocket: 0, clap: 0 };
+      this.setItem(`reactions_${targetId}`, resetCounts);
+      return resetCounts;
     }
-    return this.getItem(`reactions_${targetId}`, { like: 0, love: 0, fire: 0, rocket: 0, clap: 0 });
+    return stored;
   }
   addReaction(targetId: string = 'global', type: keyof ReactionCounts): ReactionCounts {
     const counts = this.getReactions(targetId);
@@ -943,8 +941,8 @@ class DataStore {
   // ADMIN SECURITY CREDENTIALS
   getAdminAuth(): { email: string; passwordHash: string } {
     return this.getItem('admin_auth_credentials', {
-      email: 'admin@dheerajkatwe.com',
-      passwordHash: 'admin123',
+      email: 'djkatwe',
+      passwordHash: 'WhyImFamous@123',
     });
   }
 

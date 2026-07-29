@@ -1055,11 +1055,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
                 <div>
                   <label className="block font-semibold mb-1">Admin Email / Login ID</label>
                   <input
-                    type="email"
+                    type="text"
                     value={adminAuth.email}
                     onChange={(e) => setAdminAuth({ ...adminAuth, email: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
-                    placeholder="e.g. admin@dheerajkatwe.com"
+                    className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border font-mono"
+                    placeholder="e.g. djkatwe"
                   />
                 </div>
                 <div>

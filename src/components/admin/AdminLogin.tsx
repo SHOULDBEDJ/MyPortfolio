@@ -63,9 +63,9 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onClose 
             <div className="relative flex items-center">
               <Mail className="w-4 h-4 text-muted-foreground absolute left-3.5" />
               <input
-                type="email"
+                type="text"
                 required
-                placeholder="Enter your admin email"
+                placeholder="Enter your admin login ID"
                 autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
