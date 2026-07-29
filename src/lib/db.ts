@@ -904,11 +904,38 @@ class DataStore {
   }
 
   getReactions(targetId: string = 'global'): ReactionCounts {
-    return this.getItem(`reactions_${targetId}`, { like: 142, love: 98, fire: 74, rocket: 89, clap: 65 });
+    const raw = localStorage.getItem(`reactions_${targetId}`);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed.like >= 100 || parsed.love >= 90) {
+          const resetCounts = { like: 0, love: 0, fire: 0, rocket: 0, clap: 0 };
+          this.setItem(`reactions_${targetId}`, resetCounts);
+          return resetCounts;
+        }
+        return parsed;
+      } catch (e) {}
+    }
+    return this.getItem(`reactions_${targetId}`, { like: 0, love: 0, fire: 0, rocket: 0, clap: 0 });
   }
   addReaction(targetId: string = 'global', type: keyof ReactionCounts): ReactionCounts {
     const counts = this.getReactions(targetId);
     counts[type] += 1;
+    this.setItem(`reactions_${targetId}`, counts);
+    return counts;
+  }
+  toggleVisitorReaction(
+    targetId: string = 'global',
+    previousType: keyof ReactionCounts | null,
+    newType: keyof ReactionCounts | null
+  ): ReactionCounts {
+    const counts = this.getReactions(targetId);
+    if (previousType && counts[previousType] !== undefined && counts[previousType] > 0) {
+      counts[previousType] -= 1;
+    }
+    if (newType && counts[newType] !== undefined) {
+      counts[newType] += 1;
+    }
     this.setItem(`reactions_${targetId}`, counts);
     return counts;
   }
