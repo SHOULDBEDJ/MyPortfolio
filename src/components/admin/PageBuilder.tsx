@@ -72,7 +72,7 @@ export const PageBuilder: React.FC = () => {
     { key: 'skills', label: 'Skills & Tech Stack', desc: 'Interactive skill bars and category filters' },
     { key: 'projects', label: 'Projects Showcase', desc: 'Portfolio project cards with detailed modals' },
     { key: 'codingProfiles', label: 'Coding Profiles', desc: 'GitHub, LeetCode, and HackerRank live stats' },
-    { key: 'certifications', label: 'Certifications', desc: 'Verified professional licenses & degrees' },
+    { key: 'internships', label: 'Internships', desc: 'Verified internships & practical training' },
     { key: 'experience', label: 'Career Journey', desc: 'Work experience at AarGees and education history' },
     { key: 'testimonials', label: 'Testimonials', desc: 'Client reviews and rating stars' },
     { key: 'contact', label: 'Contact Form', desc: 'Direct message submission form' },

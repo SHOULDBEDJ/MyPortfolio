@@ -36,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { name: 'Services', href: '#services' },
     { name: 'Skills', href: '#skills' },
     { name: 'Projects', href: '#projects' },
-    { name: 'Certifications', href: '#certifications' },
+    { name: 'Internships', href: '#internships' },
     { name: 'Journey', href: '#experience' },
     { name: 'Contact', href: '#contact' },
   ];
@@ -48,16 +48,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand Logo */}
         <a
           href="#"
-          className="flex items-center gap-2.5 group focus:outline-none"
+          className="flex items-center gap-2.5 group focus:outline-none min-w-0 flex-shrink"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-brand flex items-center justify-center text-primary-foreground font-extrabold text-sm shadow-md group-hover:scale-105 transition-transform duration-200">
+          <div className="w-9 h-9 flex-shrink-0 rounded-xl bg-gradient-brand flex items-center justify-center text-primary-foreground font-extrabold text-sm shadow-md group-hover:scale-105 transition-transform duration-200">
             {setupConfig.logo || 'DK'}
           </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">
+          <div className="flex flex-col min-w-0">
+            <span className="font-extrabold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors truncate max-w-[100px] xs:max-w-[160px] sm:max-w-none">
               {setupConfig.websiteName || 'Dheeraj Katwe'}
             </span>
-            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest -mt-0.5">
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest -mt-0.5 truncate max-w-[100px] xs:max-w-[160px] sm:max-w-none">
               {setupConfig.tagline || 'Software Engineer'}
             </span>
           </div>

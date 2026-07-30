@@ -5,7 +5,7 @@ import { About } from './components/About';
 import { Services } from './components/Services';
 import { Skills } from './components/Skills';
 import { Projects } from './components/Projects';
-import { Certifications } from './components/Certifications';
+import { Internships } from './components/Internships';
 import { Experience } from './components/Experience';
 import { Testimonials } from './components/Testimonials';
 import { Contact } from './components/Contact';
@@ -148,7 +148,7 @@ export const App: React.FC = () => {
             
 
 
-            {vis.certifications && <Certifications />}
+            {(vis.internships || vis.certifications) && <Internships />}
             {vis.experience && toggles.experience && <Experience />}
             {vis.testimonials && toggles.testimonials && <Testimonials />}
             {vis.contact && toggles.contactForm && <Contact />}

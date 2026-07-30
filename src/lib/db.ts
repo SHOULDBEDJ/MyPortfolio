@@ -297,7 +297,7 @@ export interface ExperienceItem {
   score?: string;
 }
 
-export interface CertificationItem {
+export interface InternshipItem {
   id: string;
   title: string;
   organization: string;
@@ -306,6 +306,8 @@ export interface CertificationItem {
   credentialUrl?: string;
   skills: string[];
 }
+
+export type CertificationItem = InternshipItem;
 
 export interface TestimonialItem {
   id: string;
@@ -362,7 +364,8 @@ export interface SectionVisibility {
   skills: boolean;
   projects: boolean;
   codingProfiles: boolean;
-  certifications: boolean;
+  internships: boolean;
+  certifications?: boolean;
   experience: boolean;
   testimonials: boolean;
   contact: boolean;
@@ -680,7 +683,7 @@ const initialSectionVisibility: SectionVisibility = {
   skills: true,
   projects: true,
   codingProfiles: true,
-  certifications: true,
+  internships: true,
   experience: true,
   testimonials: true,
   contact: true,
@@ -781,6 +784,7 @@ class DataStore {
         localStorage.setItem('portfolio_projects', JSON.stringify(initialProjects));
         localStorage.setItem('portfolio_experience', JSON.stringify(initialExperience));
         localStorage.setItem('portfolio_certifications', JSON.stringify(initialCertifications));
+        localStorage.setItem('portfolio_internships', JSON.stringify(initialCertifications));
         localStorage.setItem(SYNC_KEY, 'true');
       }
     }
@@ -1065,18 +1069,43 @@ class DataStore {
     this.setItem('experience', this.getExperience().filter(e => e.id !== id));
   }
 
-  // CERTIFICATIONS
-  getCertifications(): CertificationItem[] { return this.getItem('certifications', initialCertifications); }
-  saveCertification(cert: CertificationItem): void {
-    const items = this.getCertifications();
-    const idx = items.findIndex(c => c.id === cert.id);
-    if (idx >= 0) items[idx] = cert;
-    else items.push({ ...cert, id: Date.now().toString() });
+  // INTERNSHIPS (Renamed from Certifications for branding, backing key updated but keeping fallback)
+  getInternships(): InternshipItem[] {
+    const storedInternships = localStorage.getItem('portfolio_internships');
+    if (storedInternships) {
+      return this.getItem('internships', initialCertifications);
+    }
+    // Fallback: check if we have certifications data to migrate
+    const storedCerts = localStorage.getItem('portfolio_certifications');
+    if (storedCerts) {
+      try {
+        const certs = JSON.parse(storedCerts);
+        this.setItem('internships', certs);
+        return certs;
+      } catch { /* ignore */ }
+    }
+    return this.getItem('internships', initialCertifications);
+  }
+  saveInternship(internship: InternshipItem): void {
+    const items = this.getInternships();
+    const idx = items.findIndex(c => c.id === internship.id);
+    if (idx >= 0) items[idx] = internship;
+    else items.push({ ...internship, id: Date.now().toString() });
+    this.setItem('internships', items);
+    // Sync back to certifications for safety
     this.setItem('certifications', items);
   }
-  deleteCertification(id: string): void {
-    this.setItem('certifications', this.getCertifications().filter(c => c.id !== id));
+  deleteInternship(id: string): void {
+    const remaining = this.getInternships().filter(c => c.id !== id);
+    this.setItem('internships', remaining);
+    // Sync back to certifications for safety
+    this.setItem('certifications', remaining);
   }
+
+  // CERTIFICATIONS (Aliases for backward compatibility)
+  getCertifications(): CertificationItem[] { return this.getInternships(); }
+  saveCertification(cert: CertificationItem): void { this.saveInternship(cert); }
+  deleteCertification(id: string): void { this.deleteInternship(id); }
 
   // TESTIMONIALS
   getTestimonials(): TestimonialItem[] { return this.getItem('testimonials', initialTestimonials); }
@@ -1143,8 +1172,17 @@ class DataStore {
   }
 
   // SECTION VISIBILITY
-  getSectionVisibility(): SectionVisibility { return this.getItem('visibility', initialSectionVisibility); }
-  saveSectionVisibility(vis: SectionVisibility): void { this.setItem('visibility', vis); }
+  getSectionVisibility(): SectionVisibility {
+    const vis = this.getItem<SectionVisibility>('visibility', initialSectionVisibility);
+    if (vis.internships === undefined) {
+      vis.internships = vis.certifications !== undefined ? vis.certifications : true;
+    }
+    return vis;
+  }
+  saveSectionVisibility(vis: SectionVisibility): void {
+    vis.certifications = vis.internships;
+    this.setItem('visibility', vis);
+  }
 
   // MAINTENANCE CONFIG
   getMaintenance(): MaintenanceConfig { return this.getItem('maintenance', initialMaintenance); }
@@ -1175,6 +1213,7 @@ class DataStore {
       skills: this.getSkills(),
       services: this.getServices(),
       projects: this.getProjects(),
+      internships: this.getInternships(),
       certifications: this.getCertifications(),
       customSections: this.getCustomSections(),
       widgets: this.getWidgets(),
@@ -1200,6 +1239,13 @@ class DataStore {
       if (data.toggles) this.saveFeatureToggles(data.toggles);
       if (data.setup) this.saveSetupConfig(data.setup);
       if (data.visibility) this.saveSectionVisibility(data.visibility);
+      if (data.internships) {
+        this.setItem('internships', data.internships);
+        this.setItem('certifications', data.internships);
+      } else if (data.certifications) {
+        this.setItem('internships', data.certifications);
+        this.setItem('certifications', data.certifications);
+      }
       this.logActivity('Backup Restored', 'System data restored from JSON backup file', 'warning');
       return true;
     } catch {

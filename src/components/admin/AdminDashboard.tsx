@@ -41,7 +41,7 @@ import {
   ProjectItem,
   SkillItem,
   ExperienceItem,
-  CertificationItem,
+  InternshipItem,
   ContactMessage,
   DocumentFile,
   TestimonialItem,
@@ -65,7 +65,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
   const [projects, setProjects] = useState<ProjectItem[]>(db.getProjects());
   const [skills, setSkills] = useState<SkillItem[]>(db.getSkills());
   const [experiences, setExperiences] = useState<ExperienceItem[]>(db.getExperience());
-  const [certifications, setCertifications] = useState<CertificationItem[]>(db.getCertifications());
+  const [internships, setInternships] = useState<InternshipItem[]>(db.getInternships());
   const [messages, setMessages] = useState<ContactMessage[]>(db.getMessages());
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>(db.getTestimonials());
 
@@ -73,7 +73,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
   const [editingProject, setEditingProject] = useState<Partial<ProjectItem> | null>(null);
   const [editingSkill, setEditingSkill] = useState<Partial<SkillItem> | null>(null);
   const [editingExp, setEditingExp] = useState<Partial<ExperienceItem>>({});
-  const [editingCert, setEditingCert] = useState<Partial<CertificationItem>>({});
+  const [editingInternship, setEditingInternship] = useState<Partial<InternshipItem>>({});
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<TestimonialItem> | null>(null);
 
   // Social Links management states
@@ -100,7 +100,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     setProjects(db.getProjects());
     setSkills(db.getSkills());
     setExperiences(db.getExperience());
-    setCertifications(db.getCertifications());
+    setInternships(db.getInternships());
     setMessages(db.getMessages());
     setTestimonials(db.getTestimonials());
     setSocialLinksList(freshConfig.socialLinksList || []);
@@ -291,29 +291,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     }
   };
 
-  const handleSaveCertification = () => {
-    if (!editingCert?.title || !editingCert?.organization) {
-      toast.error('Title and Organization are required!');
+  const handleSaveInternship = () => {
+    if (!editingInternship?.title || !editingInternship?.organization) {
+      toast.error('Title and Organization/Company are required!');
       return;
     }
-    const item: CertificationItem = {
-      id: editingCert.id || Date.now().toString(),
-      title: editingCert.title || '',
-      organization: editingCert.organization || '',
-      issueDate: editingCert.issueDate || '',
-      credentialId: editingCert.credentialId || '',
-      skills: editingCert.skills || [],
+    const item: InternshipItem = {
+      id: editingInternship.id || Date.now().toString(),
+      title: editingInternship.title || '',
+      organization: editingInternship.organization || '',
+      issueDate: editingInternship.issueDate || '',
+      credentialId: editingInternship.credentialId || '',
+      skills: editingInternship.skills || [],
     };
-    db.saveCertification(item);
-    toast.success(editingCert.id ? 'Certification updated!' : 'Certification added!');
-    setEditingCert({});
+    db.saveInternship(item);
+    toast.success(editingInternship.id ? 'Internship updated!' : 'Internship added!');
+    setEditingInternship({});
     reloadData();
   };
 
-  const handleDeleteCertification = (id: string) => {
-    if (window.confirm('Delete certification?')) {
-      db.deleteCertification(id);
-      toast.success('Certification removed.');
+  const handleDeleteInternship = (id: string) => {
+    if (window.confirm('Delete internship?')) {
+      db.deleteInternship(id);
+      toast.success('Internship removed.');
       reloadData();
     }
   };
@@ -357,7 +357,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
     { id: 'projects', label: 'Projects', icon: FolderGit2 },
     { id: 'skills', label: 'Skills & Tech', icon: Code2 },
     { id: 'experience', label: 'Experience & Education', icon: Briefcase },
-    { id: 'certifications', label: 'Certifications', icon: Award },
+    { id: 'internships', label: 'Internships', icon: Award },
     { id: 'social-links', label: 'Social Media Links', icon: Globe },
     { id: 'testimonials', label: 'Reviews & Testimonials', icon: Star, count: testimonials.length },
     { id: 'documents', label: 'Documents', icon: FileText, count: documents.length },
@@ -1003,87 +1003,87 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onClos
           </div>
         )}
 
-        {/* --- TAB 5: CERTIFICATIONS --- */}
-        {activeTab === 'certifications' && (
+        {/* --- TAB 5: INTERNSHIPS --- */}
+        {activeTab === 'internships' && (
           <div className="space-y-6 max-w-4xl">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Certifications & Achievements</h2>
-                <p className="text-xs text-muted-foreground">Manage your credentials, diplomas, and official certifications.</p>
+                <h2 className="text-2xl font-bold text-foreground">Internships & Roles</h2>
+                <p className="text-xs text-muted-foreground">Manage your professional internships, practical training, and work roles.</p>
               </div>
               <button
-                onClick={() => setEditingCert({})}
+                onClick={() => setEditingInternship({})}
                 className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5"
               >
-                <Plus className="w-4 h-4" /> Add Certification
+                <Plus className="w-4 h-4" /> Add Internship
               </button>
             </div>
 
             {/* Form */}
-            {editingCert.title !== undefined && (
+            {editingInternship.title !== undefined && (
               <div className="glass-card rounded-3xl p-6 border border-primary/40 space-y-4">
-                <h3 className="font-bold text-sm">{editingCert.id ? 'Edit Certification' : 'Add Certification'}</h3>
+                <h3 className="font-bold text-sm">{editingInternship.id ? 'Edit Internship' : 'Add Internship'}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="block font-semibold mb-1">Certification Title</label>
+                    <label className="block font-semibold mb-1">Internship Title</label>
                     <input
                       type="text"
-                      value={editingCert.title || ''}
-                      onChange={(e) => setEditingCert({ ...editingCert, title: e.target.value })}
+                      value={editingInternship.title || ''}
+                      onChange={(e) => setEditingInternship({ ...editingInternship, title: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold mb-1">Issuing Organization</label>
+                    <label className="block font-semibold mb-1">Company / Organization</label>
                     <input
                       type="text"
-                      value={editingCert.organization || ''}
-                      onChange={(e) => setEditingCert({ ...editingCert, organization: e.target.value })}
+                      value={editingInternship.organization || ''}
+                      onChange={(e) => setEditingInternship({ ...editingInternship, organization: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold mb-1">Issue Date</label>
+                    <label className="block font-semibold mb-1">Period / Date</label>
                     <input
                       type="text"
-                      value={editingCert.issueDate || ''}
-                      onChange={(e) => setEditingCert({ ...editingCert, issueDate: e.target.value })}
+                      value={editingInternship.issueDate || ''}
+                      onChange={(e) => setEditingInternship({ ...editingInternship, issueDate: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold mb-1">Credential ID (optional)</label>
+                    <label className="block font-semibold mb-1">Project/Role ID (optional)</label>
                     <input
                       type="text"
-                      value={editingCert.credentialId || ''}
-                      onChange={(e) => setEditingCert({ ...editingCert, credentialId: e.target.value })}
+                      value={editingInternship.credentialId || ''}
+                      onChange={(e) => setEditingInternship({ ...editingInternship, credentialId: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-surface-2 border border-border"
                     />
                   </div>
                 </div>
                 <div className="flex gap-2 justify-end">
-                  <button onClick={() => setEditingCert({})} className="px-4 py-2 rounded-xl bg-surface-2 text-xs">Cancel</button>
-                  <button onClick={handleSaveCertification} className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold">Save Certification</button>
+                  <button onClick={() => setEditingInternship({})} className="px-4 py-2 rounded-xl bg-surface-2 text-xs">Cancel</button>
+                  <button onClick={handleSaveInternship} className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold">Save Internship</button>
                 </div>
               </div>
             )}
 
             {/* List */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {certifications.map((c) => (
+              {internships.map((c) => (
                 <div key={c.id} className="glass-card rounded-2xl p-5 border border-border space-y-2 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between">
                       <h3 className="font-bold text-sm text-foreground">{c.title}</h3>
                       <div className="flex items-center gap-1">
-                        <button onClick={() => setEditingCert(c)} className="p-1.5 rounded-lg bg-surface-2 text-muted-foreground hover:text-foreground"><Edit2 className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => handleDeleteCertification(c.id)} className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => setEditingInternship(c)} className="p-1.5 rounded-lg bg-surface-2 text-muted-foreground hover:text-foreground"><Edit2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDeleteInternship(c.id)} className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">{c.organization}</p>
                   </div>
                   <div className="text-[10px] text-muted-foreground font-mono pt-2 border-t border-border/40 flex justify-between">
-                    <span>Issued: {c.issueDate}</span>
+                    <span>Date/Period: {c.issueDate}</span>
                     <span>ID: {c.credentialId || 'N/A'}</span>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Bot, FileText, Award, Sparkles, Upload, CheckCircle2, RefreshCw, Copy, Save } from 'lucide-react';
-import { db, CertificationItem } from '../../lib/db';
+import { db, InternshipItem } from '../../lib/db';
 import { toast } from 'sonner';
 
 export const AiStudioImporter: React.FC = () => {
@@ -44,16 +44,16 @@ export const AiStudioImporter: React.FC = () => {
 
   const handleSaveOcrCert = () => {
     if (!ocrTitle || !ocrIssuer) return;
-    const cert: CertificationItem = {
+    const cert: InternshipItem = {
       id: Date.now().toString(),
       title: ocrTitle,
       organization: ocrIssuer,
       issueDate: ocrDate,
-      credentialId: ocrId || `CERT-${Date.now().toString().slice(-4)}`,
-      skills: ['Verified Credential'],
+      credentialId: ocrId || `INT-${Date.now().toString().slice(-4)}`,
+      skills: ['Verified Internship'],
     };
-    db.saveCertification(cert);
-    toast.success(`Certificate "${ocrTitle}" saved to portfolio!`);
+    db.saveInternship(cert);
+    toast.success(`Internship "${ocrTitle}" saved to portfolio!`);
     setOcrTitle('');
     setOcrIssuer('');
   };
@@ -194,16 +194,16 @@ export const AiStudioImporter: React.FC = () => {
       {activeTab === 'ocr' && (
         <div className="glass-card rounded-3xl p-6 border border-border space-y-4">
           <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" /> OCR Certificate Image Scanner
+            <Award className="w-4 h-4 text-amber-400" /> OCR Internship & Certificate Scanner
           </h3>
-          <p className="text-xs text-muted-foreground">Upload or photograph a physical certificate to automatically detect title, issuer, date, and credential ID.</p>
+          <p className="text-xs text-muted-foreground">Upload or photograph an internship certificate to automatically detect title, company, date, and ID.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold mb-1">Detected Certificate Title</label>
+              <label className="block text-xs font-semibold mb-1">Detected Internship Title</label>
               <input
                 type="text"
-                placeholder="e.g. Machine Learning Specialization"
+                placeholder="e.g. Machine Learning Internship"
                 value={ocrTitle}
                 onChange={(e) => setOcrTitle(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-surface-2 border border-border text-sm"
@@ -211,10 +211,10 @@ export const AiStudioImporter: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">Detected Issuer / Org</label>
+              <label className="block text-xs font-semibold mb-1">Company / Organization</label>
               <input
                 type="text"
-                placeholder="e.g. Coursera / Stanford Online"
+                placeholder="e.g. Google / AarGees"
                 value={ocrIssuer}
                 onChange={(e) => setOcrIssuer(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-surface-2 border border-border text-sm"
@@ -224,7 +224,7 @@ export const AiStudioImporter: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold mb-1">Issue Year</label>
+              <label className="block text-xs font-semibold mb-1">Period / Date</label>
               <input
                 type="text"
                 value={ocrDate}
@@ -234,10 +234,10 @@ export const AiStudioImporter: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1">Credential ID</label>
+              <label className="block text-xs font-semibold mb-1">Project/Role ID</label>
               <input
                 type="text"
-                placeholder="COURSERA-ML-883"
+                placeholder="INT-ML-883"
                 value={ocrId}
                 onChange={(e) => setOcrId(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-surface-2 border border-border text-sm"
@@ -249,7 +249,7 @@ export const AiStudioImporter: React.FC = () => {
             onClick={handleSaveOcrCert}
             className="px-5 py-2.5 rounded-xl text-xs font-bold bg-primary text-primary-foreground shadow flex items-center gap-2"
           >
-            <Save className="w-4 h-4" /> Save Certificate Record
+            <Save className="w-4 h-4" /> Save Internship Record
           </button>
         </div>
       )}

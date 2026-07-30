@@ -58,11 +58,11 @@ export const Experience: React.FC = () => {
         </div>
 
         {/* Tab Selector */}
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex p-1.5 rounded-full glass-card border border-border">
+        <div className="flex justify-center mb-12 max-w-full px-4">
+          <div className="flex flex-wrap md:flex-nowrap justify-center gap-2 p-1.5 rounded-3xl md:rounded-full glass-card border border-border w-full max-w-lg">
             <button
               onClick={() => setTab('all')}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
+              className={`flex-1 min-w-[90px] text-center px-4 py-2 rounded-2xl md:rounded-full text-xs font-bold transition-all ${
                 tab === 'all'
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground'
@@ -72,7 +72,7 @@ export const Experience: React.FC = () => {
             </button>
             <button
               onClick={() => setTab('work')}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
+              className={`flex-1 min-w-[110px] text-center px-4 py-2 rounded-2xl md:rounded-full text-xs font-bold transition-all ${
                 tab === 'work'
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground'
@@ -82,7 +82,7 @@ export const Experience: React.FC = () => {
             </button>
             <button
               onClick={() => setTab('education')}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
+              className={`flex-1 min-w-[80px] text-center px-4 py-2 rounded-2xl md:rounded-full text-xs font-bold transition-all ${
                 tab === 'education'
                   ? 'bg-primary text-primary-foreground shadow-md'
                   : 'text-muted-foreground hover:text-foreground'
