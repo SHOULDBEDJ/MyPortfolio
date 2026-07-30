@@ -49,6 +49,13 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Pull latest admin-panel data from Supabase on every page load
+  // so all visitors see up-to-date content (not just the admin's browser)
+  useEffect(() => {
+    db.initFromSupabase();
+  }, []);
+
+
   useEffect(() => {
     const root = document.documentElement;
     if (darkMode) {

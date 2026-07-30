@@ -1,5 +1,6 @@
 // Master Local & Supabase Enterprise Data Store for Dheeraj Katwe Portfolio
 import { useState, useEffect } from 'react';
+import { getAllKV, upsertKV, upsertManyKV } from './supabase';
 
 export interface StandardRecord {
   id: string;
@@ -763,6 +764,12 @@ const initialExperience: ExperienceItem[] = [
 
 // DATA STORE MANAGER CLASS
 class DataStore {
+  // These keys are never synced to Supabase — they stay browser-local only
+  private readonly LOCAL_ONLY_KEYS = new Set([
+    'admin_auth_credentials',
+    'activity_logs',
+  ]);
+
   constructor() {
     if (typeof window !== 'undefined') {
       const SYNC_KEY = 'portfolio_resume_synced_v10';
@@ -793,6 +800,10 @@ class DataStore {
       localStorage.setItem(`portfolio_${key}`, JSON.stringify(value));
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('db-update', { detail: { key } }));
+      }
+      // Sync to Supabase (fire-and-forget — localStorage is still source-of-truth offline)
+      if (!this.LOCAL_ONLY_KEYS.has(key)) {
+        upsertKV(key, value).catch(() => { /* silent fail */ });
       }
     } catch (e) {
       console.error(`Failed saving ${key} to localStorage`, e);
@@ -1194,6 +1205,51 @@ class DataStore {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Pull all data from Supabase into localStorage on app startup.
+   * This ensures every visitor (not just the admin's browser) sees
+   * the latest admin-panel changes.
+   */
+  async initFromSupabase(): Promise<void> {
+    const data = await getAllKV();
+    if (!data) return; // Supabase not configured or unreachable
+
+    for (const [key, value] of Object.entries(data)) {
+      if (this.LOCAL_ONLY_KEYS.has(key)) continue;
+      try {
+        localStorage.setItem(`portfolio_${key}`, JSON.stringify(value));
+      } catch { /* silent */ }
+    }
+
+    // Trigger a React re-render so components pick up the fresh data
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('db-update', { detail: { key: 'supabase-init' } }));
+    }
+  }
+
+  /**
+   * Push ALL current localStorage data up to Supabase in one batch.
+   * Useful after the very first admin setup so Supabase gets seeded.
+   */
+  async syncAllToSupabase(): Promise<void> {
+    const entries: Array<{ key: string; value: unknown }> = [];
+    const prefix = 'portfolio_';
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const fullKey = localStorage.key(i);
+      if (!fullKey || !fullKey.startsWith(prefix)) continue;
+      const key = fullKey.slice(prefix.length);
+      if (this.LOCAL_ONLY_KEYS.has(key)) continue;
+      try {
+        const raw = localStorage.getItem(fullKey);
+        if (raw) entries.push({ key, value: JSON.parse(raw) });
+      } catch { /* skip malformed */ }
+    }
+
+    await upsertManyKV(entries);
+    this.logActivity('Supabase Sync', `Pushed ${entries.length} data keys to Supabase cloud`, 'success');
   }
 }
 
